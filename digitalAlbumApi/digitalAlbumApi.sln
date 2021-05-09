@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "digitalAlbumApi", "digitalAlbumApi.csproj", "{EF68505D-AA34-4954-B4B8-4500850C4152}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digitalAlbumTests", "..\digitalAlbumTests\digitalAlbumTests.csproj", "{37CBF150-5F03-41EF-ABD7-F9C0574C9DE6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF68505D-AA34-4954-B4B8-4500850C4152}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF68505D-AA34-4954-B4B8-4500850C4152}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF68505D-AA34-4954-B4B8-4500850C4152}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF68505D-AA34-4954-B4B8-4500850C4152}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37CBF150-5F03-41EF-ABD7-F9C0574C9DE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37CBF150-5F03-41EF-ABD7-F9C0574C9DE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37CBF150-5F03-41EF-ABD7-F9C0574C9DE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37CBF150-5F03-41EF-ABD7-F9C0574C9DE6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FFD5A26B-10FA-4012-91A9-C6F70753E403}
+	EndGlobalSection
+EndGlobal
