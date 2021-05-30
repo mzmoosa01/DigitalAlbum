@@ -20,7 +20,7 @@ jobs:
         
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: digitalAlbumApi
+      working-directory: digitalAlbumTests
       
     - name: Build
       run: dotnet build digitalAlbumTests --no-restore
