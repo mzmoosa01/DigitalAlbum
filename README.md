@@ -17,6 +17,7 @@ framework code-first approach and eventually be migrated to a SQL server databas
   * Fetching images
   * Deleting images
   * Searching by image title
+  * Updating of image metadata
   
 ### Version 2
 * Upload of multiple images at one time
