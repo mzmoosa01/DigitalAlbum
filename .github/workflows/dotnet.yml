@@ -44,7 +44,7 @@ jobs:
             fi
     - name: Test PR 
       run: dotnet test --no-restore --no-build --configuration Release --logger:"liquid.md;LogFileName=${{github.workspace}}/${{env.file_name}};Title=${{env.title}};"
-      working-directory: digitalAlbumApi
+      working-directory: digitalAlbumTests
       
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2
