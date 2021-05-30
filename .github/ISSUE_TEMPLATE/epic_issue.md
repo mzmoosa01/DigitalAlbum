@@ -1,7 +1,7 @@
---------
+---
 name: Epic
 about: A task large enough that it needs to be divided into smaller tasks.
---------
+---
 
 <!-- Issue title should mirror the Epic Title. -->
 
