@@ -11,7 +11,7 @@ framework code-first approach and eventually be migrated to a SQL server databas
 
 ### Version 1
 * Automated testing via github actions
-* User registration and authentication
+* User registration and authentication (Local login)
 * CRUD operations based on user
   * Upload single image to s3 bucket
   * Fetching images
@@ -20,6 +20,7 @@ framework code-first approach and eventually be migrated to a SQL server databas
   
 ### Version 2
 * Upload of multiple images at one time
+* Add social login
 * Adding tags to images
 * Advanced searching by tag, title and upload date
 * Grouping of images into albums 
