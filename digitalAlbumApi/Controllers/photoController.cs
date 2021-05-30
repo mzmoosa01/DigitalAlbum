@@ -6,16 +6,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using digitalAlbumApi.Models;
+using Microsoft.AspNetCore.Mvc.Core;
 
 namespace digitalAlbumApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class photoController : ControllerBase
+    public class PhotoController : ControllerBase
     {
         private readonly AlbumContext _context;
 
-        public photoController(AlbumContext context)
+        public PhotoController(AlbumContext context)
         {
             _context = context;
         }
@@ -79,7 +80,6 @@ namespace digitalAlbumApi.Controllers
         {
             _context.Photos.Add(photo);
             await _context.SaveChangesAsync();
-
             return CreatedAtAction(nameof(GetPhoto), new { id = photo.photoId }, photo);
         }
 
