@@ -23,7 +23,7 @@ jobs:
       working-directory: digitalAlbumTests
       
     - name: Build
-      run: dotnet build digitalAlbumTests --no-restore
+      run: dotnet build digitalAlbumTests --no-restore --configuration Release
       
     # set pr number, if it's a pr build
     - name: set pr build number
