@@ -1,0 +1,144 @@
+﻿using AutoMapper;
+using digitalAlbumApi.DTOs.UserDtos;
+using digitalAlbumApi.Helpers;
+using digitalAlbumApi.Models;
+using digitalAlbumApi.Services;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Xunit;
+using Moq;
+using System.Security.Cryptography;
+
+namespace digitalAlbumTests
+{
+    public class UserServiceTests: IClassFixture<DatabaseFixture>
+    {
+        private DatabaseFixture dbFixture;
+        private byte[] salt;
+
+        public UserServiceTests(DatabaseFixture fixture)
+        {
+            dbFixture = fixture;
+            salt = System.Text.Encoding.UTF8.GetBytes("theTestSalt");
+            //userService = new UserService(dbFixture.dbContext);
+        }
+
+
+        [Theory]
+        [MemberData(nameof(UserServiceTestData.CreateUserNullData), MemberType =typeof(UserServiceTestData))]
+        public void CreateUser_throws_ArgumentNullException_NullValues(User user)
+        {
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            //Act
+            Action CreateAction = () => userService.CreateUser(user, "12345");
+
+            //Assert
+            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(CreateAction);
+            Assert.Equal("User", exception.ParamName);
+            Assert.Equal("No user fields can be null or empty (Parameter 'User')", exception.Message);
+        }
+
+        [Fact]
+        public void CreateUser_throws_ArgumentNullException_BlankPassword()
+        {
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            User user = new User() { Email = "abc@test.com", FirstName = "abc", LastName = "def" };
+            //Act
+            Action CreateAction = () => userService.CreateUser(user, "");
+
+            //Assert
+            ArgumentNullException exception = Assert.Throws<ArgumentNullException>(CreateAction);
+            Assert.Equal("Password", exception.ParamName);
+            Assert.Equal("Password cannot be null or empty (Parameter 'Password')", exception.Message);
+        }
+
+        [Fact]
+        public void CreateUser_throws_exception_EmailAlreadyExists()
+        {
+            //Arrange
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            User user = new User() { Email = dbFixture.getInitialUserEntries()[0].Email, FirstName = "abc", LastName = "def" };
+
+            //Act
+            Action CreateAction = () => userService.CreateUser(user, "12345");
+
+            //Assert
+            AppException exception = Assert.Throws<AppException>(CreateAction);
+            Assert.Equal("Email already exists", exception.Message);
+        }
+
+        [Fact]
+        public void CreateUser_returns_user_with_Salt()
+        {
+            //Arrange
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            User user = new User() { Email = "user@saltTest.com", FirstName = "abc", LastName = "def"};
+            byte[] expectedSalt;
+            //using (var hmac = new System.Security.Cryptography.HMACSHA512())
+            //{
+            //    expectedSalt = hmac.Key;
+            //}
+
+            //Act
+            User returnedUser = userService.CreateUser(user, "12345");
+
+            //Assert
+            Assert.Equal(salt, returnedUser.PasswordSalt);
+        }
+
+        [Fact]
+        public void CreateUser_returns_user_with_HashedPassword()
+        {
+            //Arrange
+            var hmac = new HMACSHA512(salt);
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), hmac);
+
+            User user = new User() { Email = "user@hashTest.com", FirstName = "abc", LastName = "def" };
+            string password = "abc123";
+            byte[] expectedHash;
+
+            expectedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+
+            //Act
+            User returnedUser = userService.CreateUser(user, password);
+
+            //Assert
+            Assert.Equal(expectedHash, returnedUser.PasswordHash);
+        }
+
+        [Fact]
+        public void CreateUser_saves_user_to_context()
+        {
+            //Arrange
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+
+            User user = new User() { Email = "user@Test.com", FirstName = "abc", LastName = "def" };
+            string password = "abc123";
+
+
+            //Act
+            User returnedUser = userService.CreateUser(user, password);
+            User expectedUser = dbFixture.dbContext.Users.Find(returnedUser.Id);
+
+            //Assert
+            Assert.Equal(expectedUser.Email, returnedUser.Email);
+            Assert.Equal(expectedUser.FirstName, returnedUser.FirstName);
+            Assert.Equal(expectedUser.LastName, returnedUser.LastName);
+            Assert.Equal(expectedUser.PasswordHash, returnedUser.PasswordHash);
+            Assert.Equal(expectedUser.PasswordSalt, returnedUser.PasswordSalt);
+
+        }
+    }
+
+    public class UserServiceTestData
+    {
+        public static IEnumerable<Object[]> CreateUserNullData =>
+            new List<Object[]>
+            {
+                new object[] {new User() { Email = "", FirstName = "testName", LastName = "testLast"} },
+                new object[] {new User() { Email = "testUser", FirstName = "", LastName = "testLast"} },
+                new object[] {new User() { Email = "testUser", FirstName = "testName", LastName = ""} }
+            };
+    }
+}
