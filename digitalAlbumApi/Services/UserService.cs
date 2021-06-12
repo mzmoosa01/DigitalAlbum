@@ -13,7 +13,7 @@ namespace digitalAlbumApi.Services
     {
         User CreateUser(User user, string password);
         User AuthenticateUser(string email, string password);
-        ValueTask<User> GetById(long id);
+        User GetById(long id);
     }
     public class UserService :IUserService
     {
@@ -72,10 +72,9 @@ namespace digitalAlbumApi.Services
             return null;
         }
 
-        public ValueTask<User> GetById(long id)
+        public User GetById(long id)
         {
-            var result = _context.Users.FindAsync(id);
-            return result;
+            return _context.Users.Find(id);
         }
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {

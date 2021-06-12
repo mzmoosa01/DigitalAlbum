@@ -186,20 +186,20 @@ namespace digitalAlbumTests
         }
 
         [Fact]
-        public async void GetUserById_returns_null_invalid_Id()
+        public void GetUserById_returns_null_invalid_Id()
         {
             //Arrange
             UserService userService = new UserService(dbFixture.dbContext, new HMACSHA512(salt));
 
             //Act
-            var result = await userService.GetById(100);
+            var result = userService.GetById(100);
 
             //Assert
             Assert.Null(result);
         }
 
         [Fact]
-        public async void GetUserById_returns_user_validId()
+        public void GetUserById_returns_user_validId()
         {
             //Arrange
             User expectedUser = dbFixture.getInitialUserEntries()[0];
@@ -207,7 +207,7 @@ namespace digitalAlbumTests
 
 
             //Act
-            var result = await userService.GetById(1);
+            var result = userService.GetById(1);
 
             //Assert
             Assert.IsType<User>(result);
