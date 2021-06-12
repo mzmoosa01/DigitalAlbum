@@ -1,5 +1,6 @@
 ﻿using digitalAlbumApi.DTOs.UserDtos;
 using digitalAlbumApi.Helpers;
+using digitalAlbumApi.Interfaces;
 using digitalAlbumApi.Models;
 using System;
 using System.Collections.Generic;
@@ -9,12 +10,7 @@ using System.Threading.Tasks;
 
 namespace digitalAlbumApi.Services
 {
-    public interface IUserService
-    {
-        User CreateUser(User user, string password);
-        User AuthenticateUser(string email, string password);
-        User GetById(long id);
-    }
+    
     public class UserService :IUserService
     {
         private readonly AlbumContext _context;
