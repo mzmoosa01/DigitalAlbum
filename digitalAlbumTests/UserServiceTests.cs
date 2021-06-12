@@ -74,11 +74,6 @@ namespace digitalAlbumTests
             //Arrange
             UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
             User user = new User() { Email = "user@saltTest.com", FirstName = "abc", LastName = "def"};
-            byte[] expectedSalt;
-            //using (var hmac = new System.Security.Cryptography.HMACSHA512())
-            //{
-            //    expectedSalt = hmac.Key;
-            //}
 
             //Act
             User returnedUser = userService.CreateUser(user, "12345");
@@ -190,7 +185,38 @@ namespace digitalAlbumTests
             Assert.Equal(user.Email, result.Email);
         }
 
-        
+        [Fact]
+        public async void GetUserById_returns_null_invalid_Id()
+        {
+            //Arrange
+            UserService userService = new UserService(dbFixture.dbContext, new HMACSHA512(salt));
+
+            //Act
+            var result = await userService.GetById(100);
+
+            //Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async void GetUserById_returns_user_validId()
+        {
+            //Arrange
+            User expectedUser = dbFixture.getInitialUserEntries()[0];
+            UserService userService = new UserService(dbFixture.dbContext, new HMACSHA512(salt));
+
+
+            //Act
+            var result = await userService.GetById(1);
+
+            //Assert
+            Assert.IsType<User>(result);
+            Assert.Equal(expectedUser.Email, result.Email);
+        }
+
+
+
+
     }
 
     public class UserServiceTestData
