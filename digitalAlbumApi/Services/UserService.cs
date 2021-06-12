@@ -50,6 +50,25 @@ namespace digitalAlbumApi.Services
 
             return user;
         }
+
+        public User AuthenticateUser(string email, string password)
+        {
+            if(string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                return null; 
+            }
+
+            User user = _context.Users.SingleOrDefault(u => u.Email == email);
+            if (user != null)
+            {
+                if (verifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+                {
+                    return user;
+                }
+            }
+
+            return null;
+        }
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             passwordSalt = _hmac.Key;
@@ -57,13 +76,18 @@ namespace digitalAlbumApi.Services
 
         }
 
-        //private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        //{
-        //    using (var hmac = new System.Security.Cryptography.HMACSHA512())
-        //    {
-        //        passwordSalt = hmac.Key;
-        //        passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-        //    }
-        //}
+        private bool verifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+        {
+            using(var verifyHmac = new HMACSHA512(storedSalt))
+            {
+                var computedHash = verifyHmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                for (int i = 0; i < computedHash.Length; i++)
+                {
+                    if (computedHash[i] != storedHash[i]) return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

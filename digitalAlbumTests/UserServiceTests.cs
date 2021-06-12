@@ -129,6 +129,68 @@ namespace digitalAlbumTests
             Assert.Equal(expectedUser.PasswordSalt, returnedUser.PasswordSalt);
 
         }
+
+        [Theory]
+        [MemberData(nameof(UserServiceTestData.AuthenticateUserNullData), MemberType = typeof(UserServiceTestData))]
+        public void AuthenticateUser_returns_null_missing_values(string username, string password)
+        {
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            //Act
+            var result = userService.AuthenticateUser(username, password);
+
+            //Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void AuthenticateUser_returns_null_NonExistentUser()
+        {
+            UserService userService = new UserService(dbFixture.dbContext, new HMACSHA512(salt));
+            //Act
+            var result = userService.AuthenticateUser("WeirdUsernameNoOneHas", "Random");
+
+            //Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void AuthenticateUser_returns_null_failed_verification()
+        {
+            //Arrange
+            var hmac = new HMACSHA512(salt);
+            var password = "reallyGoodPassword1";
+            User user = new User() { Email = "successTest@test.com", FirstName = "firstName1", LastName = "LastName1", PasswordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)), PasswordSalt = hmac.Key };
+            dbFixture.dbContext.Add(user);
+            dbFixture.dbContext.SaveChanges();
+            UserService userService = new UserService(dbFixture.dbContext, hmac);
+
+            //Act
+            var result = userService.AuthenticateUser(user.Email, "incorrectPassword");
+
+            //Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void AuthenticateUser_returns_user_successful_verification()
+        {
+            //Arrange
+            var hmac = new HMACSHA512(salt);
+            var password = "reallyGoodPassword1";
+            User user = new User() { Email = "failTest@test.com", FirstName = "firstName1", LastName = "LastName1", PasswordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)), PasswordSalt = hmac.Key};
+            dbFixture.dbContext.Add(user);
+            dbFixture.dbContext.SaveChanges();
+            UserService userService = new UserService(dbFixture.dbContext, hmac);
+
+            //Act
+            var result = userService.AuthenticateUser(user.Email, password);
+
+            //Assert
+            Assert.IsType<User>(result);
+            Assert.Equal(user.Email, result.Email);
+        }
+
+        
     }
 
     public class UserServiceTestData
@@ -139,6 +201,13 @@ namespace digitalAlbumTests
                 new object[] {new User() { Email = "", FirstName = "testName", LastName = "testLast"} },
                 new object[] {new User() { Email = "testUser", FirstName = "", LastName = "testLast"} },
                 new object[] {new User() { Email = "testUser", FirstName = "testName", LastName = ""} }
+            };
+
+        public static IEnumerable<Object[]> AuthenticateUserNullData =>
+            new List<Object[]>
+            {
+                new object[] {"testEmail", "" },
+                new object[] {"", "testPassword" },
             };
     }
 }
