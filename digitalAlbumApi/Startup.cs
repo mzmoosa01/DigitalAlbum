@@ -78,6 +78,8 @@ namespace digitalAlbumApi
 
             // set up DI
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IHmacSha512Wrapper, HmacSha512Wrapper>();
+
             // services.AddSwaggerGen(c =>
             // {
             //     c.SwaggerDoc("v1", new OpenApiInfo { Title = "digitalAlbumApi", Version = "v1" });

@@ -29,7 +29,7 @@ namespace digitalAlbumTests
         [MemberData(nameof(UserServiceTestData.CreateUserNullData), MemberType =typeof(UserServiceTestData))]
         public void CreateUser_throws_ArgumentNullException_NullValues(User user)
         {
-            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HmacSha512Wrapper(salt));
             //Act
             Action CreateAction = () => userService.CreateUser(user, "12345");
 
@@ -42,7 +42,7 @@ namespace digitalAlbumTests
         [Fact]
         public void CreateUser_throws_ArgumentNullException_BlankPassword()
         {
-            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HmacSha512Wrapper(salt));
             User user = new User() { Email = "abc@test.com", FirstName = "abc", LastName = "def" };
             //Act
             Action CreateAction = () => userService.CreateUser(user, "");
@@ -57,7 +57,7 @@ namespace digitalAlbumTests
         public void CreateUser_throws_exception_EmailAlreadyExists()
         {
             //Arrange
-            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HmacSha512Wrapper(salt));
             User user = new User() { Email = dbFixture.getInitialUserEntries()[0].Email, FirstName = "abc", LastName = "def" };
 
             //Act
@@ -72,7 +72,7 @@ namespace digitalAlbumTests
         public void CreateUser_returns_user_with_Salt()
         {
             //Arrange
-            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HmacSha512Wrapper(salt));
             User user = new User() { Email = "user@saltTest.com", FirstName = "abc", LastName = "def"};
 
             //Act
@@ -86,14 +86,14 @@ namespace digitalAlbumTests
         public void CreateUser_returns_user_with_HashedPassword()
         {
             //Arrange
-            var hmac = new HMACSHA512(salt);
+            var hmac = new HmacSha512Wrapper(salt);
             UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), hmac);
 
             User user = new User() { Email = "user@hashTest.com", FirstName = "abc", LastName = "def" };
             string password = "abc123";
             byte[] expectedHash;
 
-            expectedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            expectedHash = hmac.hMACSHA512.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
 
             //Act
             User returnedUser = userService.CreateUser(user, password);
@@ -106,7 +106,7 @@ namespace digitalAlbumTests
         public void CreateUser_saves_user_to_context()
         {
             //Arrange
-            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HmacSha512Wrapper(salt));
 
             User user = new User() { Email = "user@Test.com", FirstName = "abc", LastName = "def" };
             string password = "abc123";
@@ -129,7 +129,7 @@ namespace digitalAlbumTests
         [MemberData(nameof(UserServiceTestData.AuthenticateUserNullData), MemberType = typeof(UserServiceTestData))]
         public void AuthenticateUser_returns_null_missing_values(string username, string password)
         {
-            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HMACSHA512(salt));
+            UserService userService = new UserService(new AlbumContext(dbFixture.getContextOptions()), new HmacSha512Wrapper(salt));
             //Act
             var result = userService.AuthenticateUser(username, password);
 
@@ -140,7 +140,7 @@ namespace digitalAlbumTests
         [Fact]
         public void AuthenticateUser_returns_null_NonExistentUser()
         {
-            UserService userService = new UserService(dbFixture.dbContext, new HMACSHA512(salt));
+            UserService userService = new UserService(dbFixture.dbContext, new HmacSha512Wrapper(salt));
             //Act
             var result = userService.AuthenticateUser("WeirdUsernameNoOneHas", "Random");
 
@@ -152,9 +152,9 @@ namespace digitalAlbumTests
         public void AuthenticateUser_returns_null_failed_verification()
         {
             //Arrange
-            var hmac = new HMACSHA512(salt);
+            var hmac = new HmacSha512Wrapper(salt);
             var password = "reallyGoodPassword1";
-            User user = new User() { Email = "successTest@test.com", FirstName = "firstName1", LastName = "LastName1", PasswordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)), PasswordSalt = hmac.Key };
+            User user = new User() { Email = "successTest@test.com", FirstName = "firstName1", LastName = "LastName1", PasswordHash = hmac.hMACSHA512.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)), PasswordSalt = hmac.hMACSHA512.Key };
             dbFixture.dbContext.Add(user);
             dbFixture.dbContext.SaveChanges();
             UserService userService = new UserService(dbFixture.dbContext, hmac);
@@ -170,9 +170,9 @@ namespace digitalAlbumTests
         public void AuthenticateUser_returns_user_successful_verification()
         {
             //Arrange
-            var hmac = new HMACSHA512(salt);
+            var hmac = new HmacSha512Wrapper(salt);
             var password = "reallyGoodPassword1";
-            User user = new User() { Email = "failTest@test.com", FirstName = "firstName1", LastName = "LastName1", PasswordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)), PasswordSalt = hmac.Key};
+            User user = new User() { Email = "failTest@test.com", FirstName = "firstName1", LastName = "LastName1", PasswordHash = hmac.hMACSHA512.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)), PasswordSalt = hmac.hMACSHA512.Key};
             dbFixture.dbContext.Add(user);
             dbFixture.dbContext.SaveChanges();
             UserService userService = new UserService(dbFixture.dbContext, hmac);
@@ -189,7 +189,7 @@ namespace digitalAlbumTests
         public void GetUserById_returns_null_invalid_Id()
         {
             //Arrange
-            UserService userService = new UserService(dbFixture.dbContext, new HMACSHA512(salt));
+            UserService userService = new UserService(dbFixture.dbContext, new HmacSha512Wrapper(salt));
 
             //Act
             var result = userService.GetById(100);
@@ -203,7 +203,7 @@ namespace digitalAlbumTests
         {
             //Arrange
             User expectedUser = dbFixture.getInitialUserEntries()[0];
-            UserService userService = new UserService(dbFixture.dbContext, new HMACSHA512(salt));
+            UserService userService = new UserService(dbFixture.dbContext, new HmacSha512Wrapper(salt));
 
 
             //Act

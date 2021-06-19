@@ -16,10 +16,10 @@ namespace digitalAlbumApi.Services
         private readonly AlbumContext _context;
         private HMACSHA512 _hmac;
 
-        public UserService(AlbumContext context, HMACSHA512 hmac)
+        public UserService(AlbumContext context, IHmacSha512Wrapper hmacWrapper)
         {
             _context = context;
-            _hmac = hmac;
+            _hmac = hmacWrapper.hMACSHA512;
         }
 
         public User CreateUser(User user, string Password)
@@ -72,6 +72,8 @@ namespace digitalAlbumApi.Services
         {
             return _context.Users.Find(id);
         }
+
+
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             passwordSalt = _hmac.Key;
