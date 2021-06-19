@@ -12,7 +12,7 @@ namespace digitalAlbumApi.Helpers
     {
         public AutoMapperProfile()
         {
-            CreateMap<User, CreateUserDto>();
+            CreateMap<CreateUserDto, User >();
         }
     }
 }
