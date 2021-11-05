@@ -18,11 +18,3 @@ framework code-first approach and eventually be migrated to a SQL server databas
   * Deleting images
   * Searching by image title
   * Updating of image metadata
-  
-### Version 2
-* Upload of multiple images at one time
-* Add social login
-* Adding tags to images
-* Advanced searching by tag, title and upload date
-* Grouping of images into albums 
-* Ensure optimization of fetching and uploading of images
